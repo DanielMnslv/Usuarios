@@ -43,7 +43,7 @@ class SignUpView(CreateView):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(self.request, user)
-                return redirect("/")
+                return redirect(reverse("login"))
 
         except IntegrityError:
             # Handle or log the exception
