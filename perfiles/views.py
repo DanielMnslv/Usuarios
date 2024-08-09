@@ -13,6 +13,7 @@ from django.contrib.auth.views import LoginView
 from django.db import IntegrityError
 from django.db import transaction
 from django.urls import reverse_lazy
+from django.urls import reverse
 
 
 class SignUpView(CreateView):
@@ -36,7 +37,7 @@ class SignUpView(CreateView):
                     certificado_bancario=form.cleaned_data.get("certificado_bancario"),
                 )
 
-            # Authenticate and log in the user
+            # Authenticate the user
             username = form.cleaned_data.get("username")
             password = form.cleaned_data.get("password1")
             user = authenticate(username=username, password=password)
@@ -50,6 +51,9 @@ class SignUpView(CreateView):
 
         return super().form_valid(form)
 
+    def get_success_url(self):
+        return reverse("login")
+
 
 class BienvenidaView(TemplateView):
     template_name = "perfiles/bienvenida.html"
@@ -60,3 +64,19 @@ class SignInView(LoginView):
 
     def get_success_url(self):
         return reverse_lazy("bienvenida")
+
+
+class SolicitudView(TemplateView):
+    template_name = "perfiles/solicitud.html"
+
+
+class OrdenView(TemplateView):
+    template_name = "perfiles/orden.html"
+
+
+class AnticipoView(TemplateView):
+    template_name = "perfiles/anticipo.html"
+
+
+class DiarioView(TemplateView):
+    template_name = "perfiles/diario.html"
