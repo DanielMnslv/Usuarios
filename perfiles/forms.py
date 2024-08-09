@@ -56,11 +56,4 @@ class SignUpForm(UserCreationForm):
         user = super().save(commit=False)
         if commit:
             user.save()
-            perfil = Perfil.objects.create(
-                usuario=user,
-                rut=self.cleaned_data["rut"],
-                camara_comercio=self.cleaned_data["camara_comercio"],
-                cedula_rl=self.cleaned_data["cedula_rl"],
-                certificado_bancario=self.cleaned_data["certificado_bancario"],
-            )
         return user
