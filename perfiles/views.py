@@ -14,6 +14,12 @@ from django.db import IntegrityError
 from django.db import transaction
 from django.urls import reverse_lazy
 from django.urls import reverse
+from .models import Solicitud
+from .forms import SolicitudForm
+from .forms import OrdenForm
+from django.views import View
+from .forms import AnticipoForm
+from .models import Anticipo
 
 
 class SignUpView(CreateView):
@@ -43,7 +49,7 @@ class SignUpView(CreateView):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(self.request, user)
-                return redirect(reverse("login"))
+                return redirect("/")
 
         except IntegrityError:
             # Handle or log the exception
@@ -80,3 +86,43 @@ class AnticipoView(TemplateView):
 
 class DiarioView(TemplateView):
     template_name = "perfiles/diario.html"
+
+
+class SolicitudView(View):
+    def get(self, request):
+        form = SolicitudForm()
+        return render(request, "perfiles/solicitud.html", {"form": form})
+
+    def post(self, request):
+        form = SolicitudForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("bienvenida")
+        return render(request, "perfiles/solicitud.html", {"form": form})
+
+
+class OrdenView(View):
+    def get(self, request):
+        form = OrdenForm()
+        return render(request, "perfiles/orden.html", {"form": form})
+
+    def post(self, request):
+        form = OrdenForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("bienvenida")
+        return render(request, "perfiles/orden.html", {"form": form})
+
+
+def anticipo_view(request):
+    if request.method == "POST":
+        form = AnticipoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("bienvenida")
+        else:
+            print(form.errors)  # Esto te ayudará a ver cualquier error en la consola
+    else:
+        form = AnticipoForm()
+
+    return render(request, "perfiles/anticipo.html", {"form": form})
