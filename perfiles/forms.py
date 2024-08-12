@@ -5,6 +5,8 @@ from .models import Perfil
 from .models import Solicitud
 from .models import Orden
 from .models import Anticipo
+from .models import Diario
+from decimal import Decimal, ROUND_HALF_UP
 
 
 class SignUpForm(UserCreationForm):
@@ -82,6 +84,7 @@ class SolicitudForm(forms.ModelForm):
             "tipo",
             "observaciones",
             "solicitado",
+            "imagen",
         ]
         widgets = {
             "nombre": forms.TextInput(
@@ -96,9 +99,12 @@ class SolicitudForm(forms.ModelForm):
             "destino": forms.Select(attrs={"class": "form-control", "required": True}),
             "tipo": forms.Select(attrs={"class": "form-control", "required": True}),
             "observaciones": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
-            "solicitado": forms.TextInput(
+            "solicitado_por": forms.TextInput(
                 attrs={"class": "form-control", "required": True}
             ),
+            "imagen": forms.ClearableFileInput(
+                attrs={"class": "form-control", "accept": "image/*"}
+            ),  # Añadido el widget para la imagen
         }
 
 
@@ -114,6 +120,7 @@ class OrdenForm(forms.ModelForm):
             "destino",
             "tiempo_entrega",
             "observaciones",
+            "documento_pdf",
         ]
         labels = {
             "descripcion": "Descripción del Producto o Servicio",
@@ -124,6 +131,7 @@ class OrdenForm(forms.ModelForm):
             "destino": "Destino de Producto o Servicio",
             "tiempo_entrega": "Tiempo de Entrega",
             "observaciones": "Observaciones",
+            "documento_pdf": "Documento PDF",
         }
         help_texts = {
             "codigo_cotizacion": "Ingrese el número de código o cotización.",
@@ -141,14 +149,16 @@ class OrdenForm(forms.ModelForm):
             "destino": forms.Select(attrs={"class": "form-control", "required": True}),
             "tiempo_entrega": forms.TextInput(attrs={"class": "form-control"}),
             "observaciones": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "documento_pdf": forms.ClearableFileInput(
+                attrs={"class": "form-control", "accept": ".pdf"}
+            ),
         }
 
-
-def clean_precio(self):
-    precio = self.cleaned_data.get("precio")
-    if precio <= 0:
-        raise forms.ValidationError("El precio debe ser mayor que cero.")
-    return precio
+    def clean_precio(self):
+        precio = self.cleaned_data.get("precio")
+        if precio <= 0:
+            raise forms.ValidationError("El precio debe ser mayor que cero.")
+        return precio
 
 
 class AnticipoForm(forms.ModelForm):
@@ -187,12 +197,63 @@ class AnticipoForm(forms.ModelForm):
             "subtotal": forms.NumberInput(
                 attrs={"class": "form-control", "readonly": True}
             ),
-            "iva": forms.NumberInput(attrs={"class": "form-control", "required": True}),
-            "retencion": forms.NumberInput(
+            "iva": forms.Select(attrs={"class": "form-control", "required": True}),
+            "retencion": forms.Select(
                 attrs={"class": "form-control", "required": True}
             ),
             "total_pagar": forms.NumberInput(
                 attrs={"class": "form-control", "readonly": True}
             ),
             "observaciones": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+        }
+
+    def clean_vlr_unitario(self):
+        vlr_unitario = self.cleaned_data.get("vlr_unitario")
+        return Decimal(vlr_unitario).quantize(Decimal(".01"), rounding=ROUND_HALF_UP)
+
+    def clean_subtotal(self):
+        subtotal = self.cleaned_data.get("subtotal")
+        return Decimal(subtotal).quantize(Decimal(".01"), rounding=ROUND_HALF_UP)
+
+    def clean_iva(self):
+        iva = self.cleaned_data.get("iva")
+        if iva:
+            return Decimal(iva).quantize(Decimal(".01"), rounding=ROUND_HALF_UP)
+        return iva
+
+    def clean_retencion(self):
+        retencion = self.cleaned_data.get("retencion")
+        if retencion:
+            return Decimal(retencion).quantize(Decimal(".01"), rounding=ROUND_HALF_UP)
+        return retencion
+
+    def clean_total_pagar(self):
+        total_pagar = self.cleaned_data.get("total_pagar")
+        return Decimal(total_pagar).quantize(Decimal(".01"), rounding=ROUND_HALF_UP)
+
+
+class DiarioForm(forms.ModelForm):
+    class Meta:
+        model = Diario
+        fields = [
+            "tiempo_entrega",
+            "nombre",
+            "empresa",
+            "centro_costo",
+            "destino",
+            "medio_pago",
+            "documento_pdf",  # Añadido el campo para el PDF
+        ]
+        widgets = {
+            "tiempo_entrega": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "nombre": forms.TextInput(
+                attrs={"placeholder": "Nombre del Producto o Servicio"}
+            ),
+            "empresa": forms.TextInput(attrs={"placeholder": "Nombre de la Empresa"}),
+            "centro_costo": forms.Select(),
+            "destino": forms.Select(),
+            "medio_pago": forms.Select(),
+            "documento_pdf": forms.ClearableFileInput(
+                attrs={"class": "form-control", "accept": ".pdf"}
+            ),  # Widget para PDF
         }
