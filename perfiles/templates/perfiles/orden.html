@@ -129,8 +129,17 @@
                     <textarea id="observaciones" name="observaciones" rows="3"></textarea>
                 </div>
 
+                <div class="form-group">
+                    <label for="documento_pdf">Sube tu Documento PDF</label>
+                    <input type="file" id="documento_pdf" name="documento_pdf" accept=".pdf">
+                </div>
+
                 <div class="text-center">
                     <input type="submit" value="Enviar Orden">
+                </div>
+                            <!-- Botón para ver ordenes -->
+                <div class="text-center" style="margin-top: 20px;">
+                <a href="{% url 'ver_ordenes' %}" class="btn btn-primary">Ver Ordenes</a>
                 </div>
             </form>
         </div>
