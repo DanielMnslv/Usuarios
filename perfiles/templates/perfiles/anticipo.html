@@ -73,7 +73,7 @@
 <body>
     <div class="form-container" style="margin-top: 40px;">
         <h1 class="text-center">Anticipos</h1>
-        <form action="{% url 'anticipo' %}" method="POST" enctype="multipart/form-data" name="anticipos">
+        <form action="{% url 'anticipo' %}" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-group">
                 <label for="nit">NIT</label>
@@ -167,33 +167,26 @@
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     <script>
         function calcularValores() {
-            var cantidad = parseFloat(document.querySelector('input[name="cantidad"]').value) || 0;
-            var vlr_unitario = parseFloat(document.querySelector('input[name="vlr_unitario"]').value) || 0;
-            var iva = parseFloat(document.querySelector('select[name="iva"]').value) || 0;
-            var retencion = parseFloat(document.querySelector('select[name="retencion"]').value) || 0;
+    var cantidad = parseFloat(document.querySelector('input[name="cantidad"]').value) || 0;
+    var vlr_unitario = parseFloat(document.querySelector('input[name="vlr_unitario"]').value) || 0;
+    var iva = parseFloat(document.querySelector('select[name="iva"]').value) || 0;
+    var retencion = parseFloat(document.querySelector('select[name="retencion"]').value) || 0;
 
-            console.log('Cantidad:', cantidad);
-            console.log('Valor Unitario:', vlr_unitario);
-            console.log('IVA:', iva);
-            console.log('Retención:', retencion);
+    var subtotal = cantidad * vlr_unitario;
+    var valor_iva = subtotal * iva;
+    var valor_retencion = subtotal * retencion;
+    var total_pagar = subtotal + valor_iva - valor_retencion;
 
-            var subtotal = cantidad * vlr_unitario;
-            var valor_iva = subtotal * iva;
-            var valor_retencion = subtotal * retencion;
-            var total_pagar = subtotal + valor_iva - valor_retencion;
+    document.querySelector('input[name="subtotal"]').value = subtotal.toFixed(2);
+    document.querySelector('input[name="total_pagar"]').value = total_pagar.toFixed(2);
+}
 
-            console.log('Subtotal:', subtotal);
-            console.log('Valor IVA:', valor_iva);
-            console.log('Valor Retención:', valor_retencion);
-            console.log('Total a Pagar:', total_pagar);
+document.querySelectorAll('input[name="cantidad"], input[name="vlr_unitario"], select[name="iva"], select[name="retencion"]').forEach(function(element) {
+    element.addEventListener('input', calcularValores);
+});
 
-            document.querySelector('input[name="subtotal"]').value = subtotal.toFixed(2);
-            document.querySelector('input[name="total_pagar"]').value = total_pagar.toFixed(2);
-        }
 
-        document.querySelectorAll('input[name="cantidad"], input[name="vlr_unitario"], select[name="iva"], select[name="retencion"]').forEach(function(element) {
-            element.addEventListener('input', calcularValores);
-        });
+
 
     </script>
 </body>
